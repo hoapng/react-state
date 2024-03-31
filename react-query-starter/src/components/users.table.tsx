@@ -9,6 +9,12 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import { useQuery } from "@tanstack/react-query";
 
+interface IUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
 function UsersTable() {
   const [isOpenCreateModal, setIsOpenCreateModal] = useState<boolean>(false);
 
@@ -48,7 +54,7 @@ function UsersTable() {
     data: users,
   } = useQuery({
     queryKey: ["fetch-users"],
-    queryFn: () =>
+    queryFn: (): Promise<IUser[]> =>
       fetch("http://localhost:8000/users").then((res) => res.json()),
   });
   if (isPending) return "Loading...";
