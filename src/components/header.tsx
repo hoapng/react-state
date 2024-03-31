@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hook";
 import { changeMode } from "../redux/app/app.slide";
 
 function Header() {
+  const users = useAppSelector((state) => state.user.listUsers);
   const mode = useAppSelector((state) => state.app.mode);
   const dispatch = useAppDispatch();
 
@@ -17,16 +18,16 @@ function Header() {
   return (
     <Navbar className="bg-body-tertiary" data-bs-theme={mode}>
       <Container>
-        <Navbar.Brand href="#home">Navbar with text</Navbar.Brand>
+        <Navbar.Brand href="#home">Redux {users.length}</Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Form.Check
-            value={mode}
-            onChange={(e) =>
+            defaultChecked={mode === "light" ? false : true}
+            onChange={(e) => {
               dispatch(
-                changeMode(e.target.value === "light" ? "dark" : "light")
-              )
-            }
+                changeMode(e.target.checked === true ? "dark" : "light")
+              );
+            }}
             type="switch"
             id="custom-switch"
             label={
