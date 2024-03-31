@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./user/user.slide";
+import appReducer from "./app/app.slide";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    app: appReducer,
   },
 });
 
