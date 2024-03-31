@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { fetchListUsers } from "../redux/user/user.slide";
 import Button from "react-bootstrap/Button";
 
-import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "../redux/hook";
 import UserCreateModal from "./modal/user.create.modal";
 import UserEditModal from "./modal/user.edit.modal";
@@ -24,7 +23,6 @@ function UsersTable() {
   useEffect(() => {
     dispatch(fetchListUsers());
     // toast.success("fetch success")
-    toast("🦄 Wow so easy!");
   }, []);
 
   const handleEditUser = (user: any) => {
