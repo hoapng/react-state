@@ -41,7 +41,7 @@ function UsersTable() {
     const { id } = props;
 
     const { isPending, error, data } = useQuery({
-      queryKey: ["fetchUser", id],
+      queryKey: ["fetch-user", id],
       queryFn: (): Promise<IUser> =>
         fetch(`http://localhost:8000/users/${id}`).then((res) => res.json()),
     });
