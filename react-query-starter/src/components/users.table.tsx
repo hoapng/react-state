@@ -7,14 +7,13 @@ import UserDeleteModal from "./modal/user.delete.modal";
 import UsersPagination from "./pagination/users.pagination";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
 interface IUser {
   id: number;
   name: string;
   email: string;
 }
-
 function UsersTable() {
   const [isOpenCreateModal, setIsOpenCreateModal] = useState<boolean>(false);
 
@@ -22,6 +21,10 @@ function UsersTable() {
   const [dataUser, setDataUser] = useState({});
 
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const PAGE_SIZE = 2;
 
   const handleEditUser = (user: any) => {
     setDataUser(user);
@@ -36,28 +39,58 @@ function UsersTable() {
   const PopoverComponent = forwardRef((props: any, ref: any) => {
     const { id } = props;
 
+    const { isPending, error, data } = useQuery({
+      queryKey: ["fetchUser", id],
+      queryFn: (): Promise<IUser> =>
+        fetch(`http://localhost:8000/users/${id}`).then((res) => res.json()),
+    });
+
+    const getBody = () => {
+      if (isPending) {
+        return "Loading detail...";
+      }
+
+      if (error) return "An error has occurred: " + error.message;
+
+      if (data) {
+        return (
+          <>
+            {" "}
+            <div>ID = {id}</div>
+            <div>Name = {data?.name}</div>
+            <div>Email = {data?.email}</div>
+          </>
+        );
+      }
+    };
+
     return (
       <Popover ref={ref} {...props}>
         <Popover.Header as="h3">Detail User</Popover.Header>
-        <Popover.Body>
-          <div>ID = {id}</div>
-          <div>Name = ?</div>
-          <div>Email = ?</div>
-        </Popover.Body>
+        <Popover.Body>{getBody()}</Popover.Body>
       </Popover>
     );
   });
 
-  const {
-    isPending,
-    error,
-    data: users,
-  } = useQuery({
-    queryKey: ["fetch-users"],
+  const { isPending, error, data } = useQuery({
+    queryKey: ["fetchUser", currentPage],
     queryFn: (): Promise<IUser[]> =>
-      fetch("http://localhost:8000/users").then((res) => res.json()),
+      fetch(
+        `http://localhost:8000/users?_page=${currentPage}&_limit=${PAGE_SIZE}`
+      ).then((res) => {
+        const total_items = +(res.headers?.get("X-Total-Count") ?? 0);
+        const page_size = PAGE_SIZE;
+        const total_pages =
+          total_items == 0 ? 0 : (total_items - 1) / page_size + 1;
+        setTotalPages(total_pages);
+
+        return res.json();
+      }),
+    placeholderData: keepPreviousData,
   });
+
   if (isPending) return "Loading...";
+
   if (error) return "An error has occurred: " + error.message;
 
   return (
@@ -84,7 +117,7 @@ function UsersTable() {
           </tr>
         </thead>
         <tbody>
-          {users?.map((user) => {
+          {data?.map((user) => {
             return (
               <tr key={user.id}>
                 <OverlayTrigger
@@ -117,7 +150,11 @@ function UsersTable() {
           })}
         </tbody>
       </Table>
-      <UsersPagination totalPages={0} />
+      <UsersPagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
       <UserCreateModal
         isOpenCreateModal={isOpenCreateModal}
         setIsOpenCreateModal={setIsOpenCreateModal}
