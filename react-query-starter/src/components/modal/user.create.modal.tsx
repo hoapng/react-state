@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { Spinner } from "react-bootstrap";
 
-interface IUSer {
+interface IUser {
   name: string;
   email: string;
 }
